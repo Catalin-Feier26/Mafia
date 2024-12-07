@@ -3,6 +3,7 @@ import random
 import display
 from display import draw_characters
 from display import draw_button
+from display import display_game_over_screen
 
 def start_pygame_interface():
     pygame.init()
@@ -92,7 +93,7 @@ def start_game_window(screen, roles, statuses, images):
         if "Killer" not in [roles[i] for i, status in enumerate(statuses) if status == "alive"]:
             display_game_over_screen(screen, "Civilians Win")
             return
-        if len([status for status in statuses if status == "alive"]) <= 1:
+        if len([status for status in statuses if status == "alive"]) <= 2:
             display_game_over_screen(screen, "Killer Wins")
             return
 
@@ -369,56 +370,6 @@ def process_votes(screen, roles, statuses, votes, images):
     else:
         display_game_over_screen(screen, "Civilians Win")
         return True
-
-
-def display_game_over_screen(screen, message):
-    font = pygame.font.Font(None, 80)
-    button_font = pygame.font.Font(None, 50)
-    screen.fill((50, 50, 100))
-    
-    # Display game over message
-    text = font.render(message, True, (255, 255, 255))
-    screen_width, screen_height = screen.get_size()
-    screen.blit(text, ((screen_width - text.get_width()) // 2, screen_height // 3))
-
-    # Button properties
-    button_width, button_height = 200, 80
-    button_x = (screen_width - button_width) // 2
-    button_y = int(screen_height * 0.7)
-
-    pygame.display.flip()
-
-    # Wait for the player to click the continue button
-    while True:
-        screen.fill((50, 50, 100))  # Redraw background
-        screen.blit(text, ((screen_width - text.get_width()) // 2, screen_height // 3))  # Redraw message
-        
-        # Draw the button using draw_button
-        button_hovering = draw_button(
-            screen,
-            "Continue",
-            button_font,
-            (100, 200, 100),   # Button color
-            (120, 220, 120),   # Hover color
-            (255, 255, 255),   # Text color
-            button_x,
-            button_y,
-            button_width,
-            button_height
-        )
-
-        pygame.display.flip()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if button_hovering:  # Check if button is hovered and clicked
-                    pygame.quit;
-                    exit();
-                    return 
-
 
 if __name__ == "__main__":
     start_pygame_interface()
