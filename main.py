@@ -142,7 +142,6 @@ def display_night_summary(screen, roles, statuses, images, messages):
         screen.fill((50, 50, 100))
         screen_width, screen_height = screen.get_size()
 
-        
         summary_text = font.render("Night Summary", True, (255, 255, 255))
         screen.blit(summary_text, ((screen_width - summary_text.get_width()) // 2, int(screen_height * 0.05)))
 
@@ -155,22 +154,18 @@ def display_night_summary(screen, roles, statuses, images, messages):
             message_text = small_font.render(message, True, (255, 255, 255))
             screen.blit(message_text, (50, message_start_y + i * 30))  
 
-        # Draw "Continue" button
         button_width, button_height = 200, 80
         button_x = (screen_width - button_width) // 2
         button_y = int(screen_height * 0.85)
-        pygame.draw.rect(screen, (100, 200, 100), (button_x, button_y, button_width, button_height))
-        continue_text = font.render("Continue", True, (255, 255, 255))
-        screen.blit(continue_text, (button_x + (button_width - continue_text.get_width()) // 2, button_y + 20))
+        is_hovering = draw_button(screen, "Continue", font, (100, 200, 100), (80, 180, 80), (255, 255, 255), button_x, button_y, button_width, button_height)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                if button_x <= mouse_x <= button_x + button_width and button_y <= mouse_y <= button_y + button_height:
-                    return  
+            elif event.type == pygame.MOUSEBUTTONDOWN and is_hovering:
+                return  # Exit the function when the button is clicked
+
         pygame.display.flip()
 
 def game_stage_prompt(screen, roles, images, prompt, font):
@@ -184,11 +179,10 @@ def game_stage_prompt(screen, roles, images, prompt, font):
         draw_characters(screen, roles, ["alive"] * len(roles), images)
         draw_prompt_with_checkboxes(screen, prompt, labels, selected, font, positions)
 
-        # Draw Next button
-        next_x, next_y = (screen_width - 200) // 2, int(screen_height * 0.85)
-        pygame.draw.rect(screen, (100, 200, 100), (next_x, next_y, 200, 50))
-        next_text = font.render("Next", True, (255, 255, 255))
-        screen.blit(next_text, (next_x + (200 - next_text.get_width()) // 2, next_y + 10))
+        # Call the draw_button function for the "Next" button
+        button_width, button_height = 200, 50
+        next_x, next_y = (screen_width - button_width) // 2, int(screen_height * 0.85)
+        is_hovering = draw_button(screen, "Next", font, (100, 200, 100), (80, 180, 80), (255, 255, 255), next_x, next_y, button_width, button_height)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -199,11 +193,10 @@ def game_stage_prompt(screen, roles, images, prompt, font):
                 for i, pos in enumerate(positions):
                     if pos[0] <= mouse_x <= pos[0] + 30 and pos[1] <= mouse_y <= pos[1] + 30:
                         selected = i
-                if next_x <= mouse_x <= next_x + 200 and next_y <= mouse_y <= next_y + 50:
+                if is_hovering:  # Check if the button is clicked
                     return selected
 
         pygame.display.flip()
-
 
 def draw_prompt_with_checkboxes(screen, prompt, labels, selected, font, positions):
     screen_width, screen_height = screen.get_size()
@@ -216,7 +209,6 @@ def draw_prompt_with_checkboxes(screen, prompt, labels, selected, font, position
             pygame.draw.rect(screen, (255, 255, 255), (pos[0] + 5, pos[1] + 5, 20, 20))
         checkbox_text = font.render(label, True, (255, 255, 255))
         screen.blit(checkbox_text, (pos[0] + 40, pos[1]))
-
 
 def police_officer_prompt(screen, roles, images, font):
     screen_width, screen_height = screen.get_size()
@@ -236,19 +228,10 @@ def police_officer_prompt(screen, roles, images, font):
         prompt_y = int(screen_height * 0.3)  # Position the prompt above the characters
         screen.blit(prompt_text, (prompt_x, prompt_y))
 
-        # Draw Yes button
-        pygame.draw.rect(screen, (100, 200, 100), (yes_x, yes_y, button_width, button_height))
-        yes_text = font.render("Yes", True, (255, 255, 255))
-        yes_text_x = yes_x + (button_width - yes_text.get_width()) // 2
-        yes_text_y = yes_y + (button_height - yes_text.get_height()) // 2
-        screen.blit(yes_text, (yes_text_x, yes_text_y))
+        is_hovering_yes = draw_button(screen, "Yes", font, (100, 200, 100), (80, 180, 80), (255, 255, 255), yes_x, yes_y, button_width, button_height)
 
-        # Draw No button
-        pygame.draw.rect(screen, (200, 100, 100), (no_x, no_y, button_width, button_height))
-        no_text = font.render("No", True, (255, 255, 255))
-        no_text_x = no_x + (button_width - no_text.get_width()) // 2
-        no_text_y = no_y + (button_height - no_text.get_height()) // 2
-        screen.blit(no_text, (no_text_x, no_text_y))
+        # Call the draw_button function for the "No" button
+        is_hovering_no = draw_button(screen, "No", font, (200, 100, 100), (180, 80, 80), (255, 255, 255), no_x, no_y, button_width, button_height)
 
         # Handle events
         for event in pygame.event.get():
@@ -257,9 +240,9 @@ def police_officer_prompt(screen, roles, images, font):
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                if yes_x <= mouse_x <= yes_x + button_width and yes_y <= mouse_y <= yes_y + button_height:
+                if is_hovering_yes:  # Check if the Yes button is clicked
                     return True
-                elif no_x <= mouse_x <= no_x + button_width and no_y <= mouse_y <= no_y + button_height:
+                elif is_hovering_no:  # Check if the No button is clicked
                     return False
 
         pygame.display.flip()
@@ -286,6 +269,9 @@ def voting_stage(screen, roles, statuses, images):
         margin = (screen_width - len(alive_players) * rect_width) // (len(alive_players) + 1)
         y = int(screen_height * 0.2)
 
+        # Get mouse position
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
         for i, player_index in enumerate(alive_players):
             x = margin + i * (rect_width + margin)
             # Draw player rectangle
@@ -294,7 +280,6 @@ def voting_stage(screen, roles, statuses, images):
 
             index_text = small_font.render(f"{player_index + 1}", True, (255, 255, 255))
             screen.blit(index_text, (x + (rect_width - index_text.get_width()) // 2, y - 30))
-
 
             dropdown_x = x
             dropdown_y = y + rect_height + 20
@@ -307,7 +292,6 @@ def voting_stage(screen, roles, statuses, images):
                     option_y = dropdown_y + j * dropdown_height
                     option_text = small_font.render(f"Player {target_player + 1}", True, (0, 0, 0))
                     screen.blit(option_text, (dropdown_x + 5, option_y + 5))
-                    mouse_x, mouse_y = pygame.mouse.get_pos()
                     if dropdown_x <= mouse_x <= dropdown_x + dropdown_width and option_y <= mouse_y <= option_y + dropdown_height:
                         pygame.draw.rect(screen, (180, 180, 180), (dropdown_x, option_y, dropdown_width, dropdown_height))
                         if pygame.mouse.get_pressed()[0]:  
@@ -322,23 +306,33 @@ def voting_stage(screen, roles, statuses, images):
                 pygame.draw.rect(screen, (255, 255, 255), (dropdown_x, dropdown_y, dropdown_width, dropdown_height))
                 screen.blit(selected_text, (dropdown_x + 5, dropdown_y + 5))
 
+        # Replace button code with draw_button
         button_width, button_height = 200, 80
         button_x = (screen_width - button_width) // 2
         button_y = int(screen_height * 0.85)
-        pygame.draw.rect(screen, (100, 200, 100), (button_x, button_y, button_width, button_height))
-        continue_text = font.render("Continue", True, (255, 255, 255))
-        screen.blit(continue_text, (button_x + (button_width - continue_text.get_width()) // 2, button_y + 20))
+
+        button_hovering = draw_button(
+            screen,
+            "Continue",
+            font,
+            (100, 200, 100),
+            (120, 220, 120),
+            (255, 255, 255),
+            button_x,
+            button_y,
+            button_width,
+            button_height,
+        )
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
+                if button_hovering:  # Check if button is hovered and clicked
+                    running = False  # Exit the loop
                 
-                if button_x <= mouse_x <= button_x + button_width and button_y <= mouse_y <= button_y + button_height:
-                    running = False  
-                
+                # Handle dropdown toggling
                 for player_index in alive_players:
                     dropdown_x = margin + alive_players.index(player_index) * (rect_width + margin)
                     dropdown_y = y + rect_height + 20
@@ -381,31 +375,49 @@ def display_game_over_screen(screen, message):
     font = pygame.font.Font(None, 80)
     button_font = pygame.font.Font(None, 50)
     screen.fill((50, 50, 100))
+    
+    # Display game over message
     text = font.render(message, True, (255, 255, 255))
     screen_width, screen_height = screen.get_size()
     screen.blit(text, ((screen_width - text.get_width()) // 2, screen_height // 3))
 
-    # Draw "Continue" button
+    # Button properties
     button_width, button_height = 200, 80
     button_x = (screen_width - button_width) // 2
     button_y = int(screen_height * 0.7)
-    pygame.draw.rect(screen, (100, 200, 100), (button_x, button_y, button_width, button_height))
-    continue_text = button_font.render("Continue", True, (255, 255, 255))
-    screen.blit(continue_text, (button_x + (button_width - continue_text.get_width()) // 2, button_y + (button_height - continue_text.get_height()) // 2))
 
     pygame.display.flip()
 
     # Wait for the player to click the continue button
     while True:
+        screen.fill((50, 50, 100))  # Redraw background
+        screen.blit(text, ((screen_width - text.get_width()) // 2, screen_height // 3))  # Redraw message
+        
+        # Draw the button using draw_button
+        button_hovering = draw_button(
+            screen,
+            "Continue",
+            button_font,
+            (100, 200, 100),   # Button color
+            (120, 220, 120),   # Hover color
+            (255, 255, 255),   # Text color
+            button_x,
+            button_y,
+            button_width,
+            button_height
+        )
+
+        pygame.display.flip()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                if button_x <= mouse_x <= button_x + button_width and button_y <= mouse_y <= button_y + button_height:
-                    pygame.quit()
-                    return  # Exit the game
+                if button_hovering:  # Check if button is hovered and clicked
+                    pygame.quit;
+                    exit();
+                    return 
 
 
 if __name__ == "__main__":
