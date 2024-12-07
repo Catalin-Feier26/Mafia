@@ -4,6 +4,7 @@ import display
 from display import draw_characters
 from display import draw_button
 from display import display_game_over_screen
+from display import display_elimination_summary
 
 def start_pygame_interface():
     pygame.init()
@@ -87,7 +88,7 @@ def load_scaled_images(rect_width, rect_height):
 
 def start_game_window(screen, roles, statuses, images):
     font = pygame.font.Font(None, 40)
-
+    statuses_before = statuses
     while True:
         # Check for game win conditions before starting the next round
         if "Killer" not in [roles[i] for i, status in enumerate(statuses) if status == "alive"]:
@@ -99,40 +100,44 @@ def start_game_window(screen, roles, statuses, images):
 
         messages = [] 
 
-        doctor_choice = game_stage_prompt(screen, roles, images, "Doctor: Who do you want to save?", font)
+        # Doctor's turn to save a player
+        doctor_choice = game_stage_prompt(screen, statuses_before, roles, images, "Doctor: Who do you want to save?", font)
         messages.append(f"Doctor chose to save: Player {doctor_choice + 1}")
-        saved_player = doctor_choice
+        saved_player = doctor_choice  # Save player who was saved
 
-        # Police's turn
-        if police_officer_prompt(screen, roles, images, font):
-            police_choice = game_stage_prompt(screen, roles, images, "Police: Who do you want to shoot?", font)
+        # Police's turn to shoot a player
+        if police_officer_prompt(screen, statuses, roles, images, font):
+            police_choice = game_stage_prompt(screen, statuses_before, roles, images, "Police: Who do you want to shoot?", font)
             messages.append(f"Police chose to shoot: Player {police_choice + 1}")
 
             if police_choice == saved_player:
                 messages.append(f"Police's shot had no effect because Player {police_choice + 1} was saved.")
             elif roles[police_choice] == "Killer":
-                statuses[police_choice] = "dead"
+                statuses[police_choice] = "dead"  # Update the status immediately
                 messages.append(f"Police successfully shot the Killer (Player {police_choice + 1}).")
             else:
-                statuses[police_choice] = "dead"
-                statuses[roles.index("Police")] = "dead"
+                statuses[police_choice] = "dead"  # Update the status immediately
+                statuses[roles.index("Police")] = "dead"  # Police dies if they miss
                 messages.append(f"Police and Player {police_choice + 1} both died.")
         else:
             messages.append("Police chose not to shoot anyone.")
 
-        killer_choice = game_stage_prompt(screen, roles, images, "Killer: Who do you want to kill?", font)
+        # Killer's turn to kill a player
+        killer_choice = game_stage_prompt(screen, statuses_before, roles, images, "Killer: Who do you want to kill?", font)
         messages.append(f"Killer chose to kill: Player {killer_choice + 1}")
 
         if killer_choice == saved_player:
             messages.append(f"Killer's attack had no effect because Player {killer_choice + 1} was saved.")
         else:
-            statuses[killer_choice] = "dead"
+            statuses[killer_choice] = "dead"  # Update the status immediately
             messages.append(f"Killer successfully killed Player {killer_choice + 1}.")
 
+        # Update game status and display the night summary
         display_night_summary(screen, roles, statuses, images, messages)
 
+        # After the night phase, proceed to the voting stage
         game_over = voting_stage(screen, roles, statuses, images)
-        if game_over:  
+        if game_over:
             return
 
 def display_night_summary(screen, roles, statuses, images, messages):
@@ -169,7 +174,7 @@ def display_night_summary(screen, roles, statuses, images, messages):
 
         pygame.display.flip()
 
-def game_stage_prompt(screen, roles, images, prompt, font):
+def game_stage_prompt(screen, statuses, roles, images, prompt, font):
     screen_width, screen_height = screen.get_size()
     positions = [(i * 100 + 50, int(screen_height * 0.5) + 50) for i in range(8)]
     labels = [str(i + 1) for i in range(8)]
@@ -177,7 +182,7 @@ def game_stage_prompt(screen, roles, images, prompt, font):
 
     while True:
         screen.fill((50, 50, 100))
-        draw_characters(screen, roles, ["alive"] * len(roles), images)
+        draw_characters(screen, roles, statuses, images)
         draw_prompt_with_checkboxes(screen, prompt, labels, selected, font, positions)
 
         # Call the draw_button function for the "Next" button
@@ -211,7 +216,7 @@ def draw_prompt_with_checkboxes(screen, prompt, labels, selected, font, position
         checkbox_text = font.render(label, True, (255, 255, 255))
         screen.blit(checkbox_text, (pos[0] + 40, pos[1]))
 
-def police_officer_prompt(screen, roles, images, font):
+def police_officer_prompt(screen, statuses, roles, images, font):
     screen_width, screen_height = screen.get_size()
 
     button_width, button_height = 200, 50
@@ -221,7 +226,7 @@ def police_officer_prompt(screen, roles, images, font):
     while True:
         screen.fill((50, 50, 100))
         
-        draw_characters(screen, roles, ["alive"] * len(roles), images)
+        draw_characters(screen, roles, statuses, images)
 
         # Draw prompt above the characters
         prompt_text = font.render("Police: Do you want to shoot someone?", True, (255, 255, 255))
@@ -343,7 +348,9 @@ def voting_stage(screen, roles, statuses, images):
         pygame.display.flip()
 
     print("Votes:", votes)
-    return process_votes(screen, roles, statuses, votes, images)
+    # Process the votes and transition to the next phase or game over screen
+    process_votes(screen, roles, statuses, votes, images)
+    return
 
 def process_votes(screen, roles, statuses, votes, images):
     # Tally votes
@@ -359,17 +366,23 @@ def process_votes(screen, roles, statuses, votes, images):
         eliminated_player = potential_killers[0]
         statuses[eliminated_player] = "dead"
         print(f"Player {eliminated_player + 1} eliminated as the suspected killer.")
+
+        # If the eliminated player is the killer, the game ends
         if roles[eliminated_player] == "Killer":
             display_game_over_screen(screen, "Civilians Win")
-            return True  # Game over
+            return True  # End game
     else:
         print("No majority vote. No one is eliminated.")
 
-    if "Killer" in [roles[i] for i, status in enumerate(statuses) if status == "alive"]:
-        return False 
+    # Show the elimination summary screen
+    display_elimination_summary(screen, roles, statuses, votes, images)
+
+    # After showing the summary, check if the game is over
+    if any(roles[i] == "Killer" and statuses[i] == "alive" for i in range(len(roles))):
+        return False  # Continue the game (killer still alive)
     else:
         display_game_over_screen(screen, "Civilians Win")
-        return True
+        return True  # Game over (no killers alive)
 
 if __name__ == "__main__":
     start_pygame_interface()
