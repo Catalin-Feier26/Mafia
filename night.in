@@ -1,0 +1,75 @@
+set(binary_resolution).
+set(print_gen).
+
+% RULES
+% 1. There are 8 players.
+% 2. There is 1 killer, 1 doctor, and 1 police.
+% 3. The game ends when the killer is dead.
+% 4. The game ends when there are 2 players alive, and 1 is the killer.
+
+% NOTATIONS
+% P1, P2, ..., P8: players
+% killer(X): X is the killer
+% doctor(X): X is the doctor
+% officer(X): X is the police officer
+% civilian(X): X is a civilian
+% alive(X): X is alive
+% dead(X): X is dead
+% civilians_win: civilians win
+% killer_wins: killer wins
+
+formulas(assumptions).
+
+% Each player is either the killer, doctor, officer, or a civilian.
+killer(P1) | doctor(P1) | officer(P1) | civilian(P1).
+killer(P2) | doctor(P2) | officer(P2) | civilian(P2).
+killer(P3) | doctor(P3) | officer(P3) | civilian(P3).
+killer(P4) | doctor(P4) | officer(P4) | civilian(P4).
+killer(P5) | doctor(P5) | officer(P5) | civilian(P5).
+killer(P6) | doctor(P6) | officer(P6) | civilian(P6).
+killer(P7) | doctor(P7) | officer(P7) | civilian(P7).
+killer(P8) | doctor(P8) | officer(P8) | civilian(P8).
+
+% There is exactly 1 killer.
+all x all y (killer(x) & killer(y) -> x = y).
+
+% If someone is alive, they cannot be dead.
+all x (alive(x) -> -dead(x)).
+all x (dead(x) -> -alive(x)).
+-civilians_win -> killer_wins.
+
+
+alive(x) -> -dead(x).
+dead(x) -> -alive(x).
+
+% Civilians win logic:
+all x (killer(x) & dead(x) -> civilians_win).
+
+% Killer win logic:
+exists x exists y (
+  alive(x) & alive(y) & killer(x) & (x != y) &
+  all z (alive(z) -> (z = x | z = y))
+) -> killer_wins.
+
+exists x (
+  alive(x) & killer(x) & all y (alive(y) -> y = x)
+) -> killer_wins.
+
+% What is known
+dead(P4).
+dead(P5).
+dead(P8).
+dead(P7).
+dead(P3).
+dead(P1).
+killer(P6).
+dead(P2).
+alive(P6).
+-civilians_win.
+
+end_of_list.
+
+formulas(goals).
+killer_wins.
+
+end_of_list.

@@ -6,6 +6,23 @@ from display import draw_button
 from display import display_game_over_screen
 from display import display_elimination_summary
 
+filename = "summary.txt"
+is_first_write = True
+night_number=1
+
+def write_to_file(content):
+    global is_first_write
+    mode = "w" if is_first_write else "a"  # Determine write or append mode
+    with open(filename, mode) as file:
+        if isinstance(content, list):  # Check if content is a list
+            for message in content:
+                file.write(str(message))  # Write each message in the list
+        else:  # Assume content is a string
+            file.write(str(content))
+    if is_first_write:
+        is_first_write = False  # Update the global flag after the first write
+
+
 def start_pygame_interface():
     pygame.init()
     screen = pygame.display.set_mode((1340, 960))  
@@ -88,17 +105,26 @@ def load_scaled_images(rect_width, rect_height):
 
 def start_game_window(screen, roles, statuses, images):
     font = pygame.font.Font(None, 40)
+    global night_number
     statuses_before = statuses
     while True:
         # Check for game win conditions before starting the next round
         if "Killer" not in [roles[i] for i, status in enumerate(statuses) if status == "alive"]:
+            msg=f"killer(P{roles.index('Killer')+1}).\n"
+            write_to_file(msg)
             display_game_over_screen(screen, "Civilians Win")
             return
         if len([status for status in statuses if status == "alive"]) <= 2:
+            msg=f"killer(P{roles.index('Killer')+1}).\n"
+            write_to_file(msg)
+            msg="-civilians_win.\n"
+            write_to_file(msg)
             display_game_over_screen(screen, "Killer Wins")
             return
 
-        messages = [] 
+        messages = []
+        summary_msg =[]
+        night_number=night_number+1;
 
         # Doctor's turn to save a player
         doctor_choice = game_stage_prompt(screen, statuses_before, roles, images, "Doctor: Who do you want to save?", font)
@@ -109,16 +135,19 @@ def start_game_window(screen, roles, statuses, images):
         if police_officer_prompt(screen, statuses, roles, images, font):
             police_choice = game_stage_prompt(screen, statuses_before, roles, images, "Police: Who do you want to shoot?", font)
             messages.append(f"Police chose to shoot: Player {police_choice + 1}")
-
+        
             if police_choice == saved_player:
                 messages.append(f"Police's shot had no effect because Player {police_choice + 1} was saved.")
             elif roles[police_choice] == "Killer":
                 statuses[police_choice] = "dead"  # Update the status immediately
                 messages.append(f"Police successfully shot the Killer (Player {police_choice + 1}).")
+                summary_msg.append(f"dead(P{police_choice+1}).\n")
             else:
                 statuses[police_choice] = "dead"  # Update the status immediately
                 statuses[roles.index("Police")] = "dead"  # Police dies if they miss
                 messages.append(f"Police and Player {police_choice + 1} both died.")
+                summary_msg.append(f"dead(P{police_choice+1}).\n")
+                summary_msg.append(f"dead(P{roles.index('Police')}).\n")
         else:
             messages.append("Police chose not to shoot anyone.")
 
@@ -130,20 +159,21 @@ def start_game_window(screen, roles, statuses, images):
             messages.append(f"Killer's attack had no effect because Player {killer_choice + 1} was saved.")
         else:
             statuses[killer_choice] = "dead"  # Update the status immediately
-            messages.append(f"Killer successfully killed Player {killer_choice + 1}.")
+            messages.append(f"Killer(Player{roles.index('Killer') + 1}) successfully killed Player {killer_choice + 1}.")
+            summary_msg.append(f"dead(P{killer_choice+1}).\n")
 
         # Update game status and display the night summary
-        display_night_summary(screen, roles, statuses, images, messages)
+        display_night_summary(screen, roles, statuses, images, messages, summary_msg)
 
         # After the night phase, proceed to the voting stage
         game_over = voting_stage(screen, roles, statuses, images)
         if game_over:
             return
 
-def display_night_summary(screen, roles, statuses, images, messages):
+def display_night_summary(screen, roles, statuses, images, messages, summary_msg):
     font = pygame.font.Font(None, 50)
     small_font = pygame.font.Font(None, 36)
-
+    write_to_file(summary_msg)
     while True:
         screen.fill((50, 50, 100))
         screen_width, screen_height = screen.get_size()
@@ -366,13 +396,17 @@ def process_votes(screen, roles, statuses, votes, images):
         eliminated_player = potential_killers[0]
         statuses[eliminated_player] = "dead"
         print(f"Player {eliminated_player + 1} eliminated as the suspected killer.")
-
+        msg=(f"dead(P{eliminated_player+1}).\n")
+        write_to_file(msg)
         # If the eliminated player is the killer, the game ends
         if roles[eliminated_player] == "Killer":
+            msg=f"killer(P{roles.index('Killer')+1}).\n"
+            write_to_file(msg)
             display_game_over_screen(screen, "Civilians Win")
-            return True  # End game
+            return True 
     else:
         print("No majority vote. No one is eliminated.")
+
 
     # Show the elimination summary screen
     display_elimination_summary(screen, roles, statuses, votes, images)

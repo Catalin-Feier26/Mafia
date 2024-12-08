@@ -1,0 +1,298 @@
+============================== Prover9 ===============================
+Prover9 (64) version 2009-11A, November 2009.
+Process 77845 was started by cata on DESKTOP-6I43JMK,
+Sun Dec  8 23:42:56 2024
+The command was "/home/cata/LADR-2009-11A/bin/prover9 -f night.in".
+============================== end of head ===========================
+
+============================== INPUT =================================
+
+% Reading from file night.in
+
+set(binary_resolution).
+set(print_gen).
+
+formulas(assumptions).
+killer(P1) | doctor(P1) | officer(P1) | civilian(P1).
+killer(P2) | doctor(P2) | officer(P2) | civilian(P2).
+killer(P3) | doctor(P3) | officer(P3) | civilian(P3).
+killer(P4) | doctor(P4) | officer(P4) | civilian(P4).
+killer(P5) | doctor(P5) | officer(P5) | civilian(P5).
+killer(P6) | doctor(P6) | officer(P6) | civilian(P6).
+killer(P7) | doctor(P7) | officer(P7) | civilian(P7).
+killer(P8) | doctor(P8) | officer(P8) | civilian(P8).
+(all x all y (killer(x) & killer(y) -> x = y)).
+(all x (alive(x) -> -dead(x))).
+(all x (dead(x) -> -alive(x))).
+alive(x) -> -dead(x).
+dead(x) -> -alive(x).
+(all x (killer(x) & dead(x) -> civilians_win)).
+(exists x exists y (alive(x) & alive(y) & killer(x) & x != y & (all z (alive(z) -> z = x | z = y)))) -> killer_wins.
+(exists x (alive(x) & killer(x) & (all y (alive(y) -> y = x)))) -> killer_wins.
+-civilians_win -> killer_wins.
+dead(P4).
+dead(P5).
+dead(P8).
+dead(P7).
+dead(P3).
+dead(P1).
+killer(P6).
+dead(P2).
+alive(P6).
+-civilians_win.
+end_of_list.
+
+formulas(goals).
+killer_wins.
+end_of_list.
+
+============================== end of input ==========================
+
+============================== PROCESS NON-CLAUSAL FORMULAS ==========
+
+% Formulas that are not ordinary clauses:
+1 (all x all y (killer(x) & killer(y) -> x = y)) # label(non_clause).  [assumption].
+2 (all x (alive(x) -> -dead(x))) # label(non_clause).  [assumption].
+3 (all x (dead(x) -> -alive(x))) # label(non_clause).  [assumption].
+4 alive(x) -> -dead(x) # label(non_clause).  [assumption].
+5 dead(x) -> -alive(x) # label(non_clause).  [assumption].
+6 (all x (killer(x) & dead(x) -> civilians_win)) # label(non_clause).  [assumption].
+7 (exists x exists y (alive(x) & alive(y) & killer(x) & x != y & (all z (alive(z) -> z = x | z = y)))) -> killer_wins # label(non_clause).  [assumption].
+8 (exists x (alive(x) & killer(x) & (all y (alive(y) -> y = x)))) -> killer_wins # label(non_clause).  [assumption].
+9 -civilians_win -> killer_wins # label(non_clause).  [assumption].
+10 killer_wins # label(non_clause) # label(goal).  [goal].
+
+============================== end of process non-clausal formulas ===
+
+============================== PROCESS INITIAL CLAUSES ===============
+
+% Clauses before input processing:
+
+formulas(usable).
+end_of_list.
+
+formulas(sos).
+killer(P1) | doctor(P1) | officer(P1) | civilian(P1).  [assumption].
+killer(P2) | doctor(P2) | officer(P2) | civilian(P2).  [assumption].
+killer(P3) | doctor(P3) | officer(P3) | civilian(P3).  [assumption].
+killer(P4) | doctor(P4) | officer(P4) | civilian(P4).  [assumption].
+killer(P5) | doctor(P5) | officer(P5) | civilian(P5).  [assumption].
+killer(P6) | doctor(P6) | officer(P6) | civilian(P6).  [assumption].
+killer(P7) | doctor(P7) | officer(P7) | civilian(P7).  [assumption].
+killer(P8) | doctor(P8) | officer(P8) | civilian(P8).  [assumption].
+-killer(x) | -killer(y) | y = x.  [clausify(1)].
+-alive(x) | -dead(x).  [clausify(2)].
+-dead(x) | -alive(x).  [clausify(3)].
+-alive(x) | -dead(x).  [clausify(4)].
+-dead(x) | -alive(x).  [clausify(5)].
+-killer(x) | -dead(x) | civilians_win.  [clausify(6)].
+-alive(x) | -alive(y) | -killer(x) | y = x | alive(f1(x,y)) | killer_wins.  [clausify(7)].
+-alive(x) | -alive(y) | -killer(x) | y = x | f1(x,y) != x | killer_wins.  [clausify(7)].
+-alive(x) | -alive(y) | -killer(x) | y = x | f1(x,y) != y | killer_wins.  [clausify(7)].
+-alive(x) | -killer(x) | alive(f2(x)) | killer_wins.  [clausify(8)].
+-alive(x) | -killer(x) | f2(x) != x | killer_wins.  [clausify(8)].
+civilians_win | killer_wins.  [clausify(9)].
+dead(P4).  [assumption].
+dead(P5).  [assumption].
+dead(P8).  [assumption].
+dead(P7).  [assumption].
+dead(P3).  [assumption].
+dead(P1).  [assumption].
+killer(P6).  [assumption].
+dead(P2).  [assumption].
+alive(P6).  [assumption].
+-civilians_win.  [assumption].
+-killer_wins.  [deny(10)].
+end_of_list.
+
+formulas(demodulators).
+end_of_list.
+
+============================== PREDICATE ELIMINATION =================
+
+Eliminating doctor/1
+
+Eliminating dead/1
+11 dead(P4).  [assumption].
+12 -alive(x) | -dead(x).  [clausify(2)].
+13 -dead(x) | -alive(x).  [clausify(3)].
+14 -alive(x) | -dead(x).  [clausify(4)].
+15 -dead(x) | -alive(x).  [clausify(5)].
+16 -killer(x) | -dead(x) | civilians_win.  [clausify(6)].
+Derived: -alive(P4).  [resolve(11,a,12,b)].
+Derived: -killer(P4) | civilians_win.  [resolve(11,a,16,b)].
+17 dead(P5).  [assumption].
+Derived: -alive(P5).  [resolve(17,a,12,b)].
+Derived: -killer(P5) | civilians_win.  [resolve(17,a,16,b)].
+18 dead(P8).  [assumption].
+Derived: -alive(P8).  [resolve(18,a,12,b)].
+Derived: -killer(P8) | civilians_win.  [resolve(18,a,16,b)].
+19 dead(P7).  [assumption].
+Derived: -alive(P7).  [resolve(19,a,12,b)].
+Derived: -killer(P7) | civilians_win.  [resolve(19,a,16,b)].
+20 dead(P3).  [assumption].
+Derived: -alive(P3).  [resolve(20,a,12,b)].
+Derived: -killer(P3) | civilians_win.  [resolve(20,a,16,b)].
+21 dead(P1).  [assumption].
+Derived: -alive(P1).  [resolve(21,a,12,b)].
+Derived: -killer(P1) | civilians_win.  [resolve(21,a,16,b)].
+22 dead(P2).  [assumption].
+Derived: -alive(P2).  [resolve(22,a,12,b)].
+Derived: -killer(P2) | civilians_win.  [resolve(22,a,16,b)].
+
+============================== end predicate elimination =============
+
+Auto_denials:  (non-Horn, no changes).
+
+Term ordering decisions:
+Predicate symbol precedence:  predicate_order([ =, civilians_win, killer_wins, killer, alive ]).
+Function symbol precedence:  function_order([ P6, P1, P2, P3, P4, P5, P7, P8, f1, f2 ]).
+After inverse_order:  (no changes).
+Unfolding symbols: (none).
+
+Auto_inference settings:
+  % set(paramodulation).  % (positive equality literals)
+  % set(binary_resolution).  % (non-Horn)
+  % set(neg_ur_resolution).  % (non-Horn, less than 100 clauses)
+
+Auto_process settings:
+  % set(factor).  % (non-Horn)
+  % set(unit_deletion).  % (non-Horn)
+
+
+generated: -killer(x) | -killer(y) | y = x.  [clausify(1)].
+kept:      23 -killer(x) | -killer(y) | y = x.  [clausify(1)].
+
+generated: -alive(x) | -alive(y) | -killer(x) | y = x | alive(f1(x,y)) | killer_wins.  [clausify(7)].
+kept:      24 -alive(x) | -alive(y) | -killer(x) | y = x | alive(f1(x,y)) | killer_wins.  [clausify(7)].
+
+generated: -alive(x) | -alive(y) | -killer(x) | y = x | f1(x,y) != x | killer_wins.  [clausify(7)].
+kept:      25 -alive(x) | -alive(y) | -killer(x) | y = x | f1(x,y) != x | killer_wins.  [clausify(7)].
+
+generated: -alive(x) | -alive(y) | -killer(x) | y = x | f1(x,y) != y | killer_wins.  [clausify(7)].
+kept:      26 -alive(x) | -alive(y) | -killer(x) | y = x | f1(x,y) != y | killer_wins.  [clausify(7)].
+
+generated: -alive(x) | -killer(x) | alive(f2(x)) | killer_wins.  [clausify(8)].
+kept:      27 -alive(x) | -killer(x) | alive(f2(x)) | killer_wins.  [clausify(8)].
+
+generated: -alive(x) | -killer(x) | f2(x) != x | killer_wins.  [clausify(8)].
+kept:      28 -alive(x) | -killer(x) | f2(x) != x | killer_wins.  [clausify(8)].
+
+generated: civilians_win | killer_wins.  [clausify(9)].
+kept:      29 civilians_win | killer_wins.  [clausify(9)].
+
+generated: killer(P6).  [assumption].
+kept:      30 killer(P6).  [assumption].
+
+generated: alive(P6).  [assumption].
+kept:      31 alive(P6).  [assumption].
+
+generated: -civilians_win.  [assumption].
+kept:      32 -civilians_win.  [assumption].
+
+generated: -killer_wins.  [deny(10)].
+kept:      33 -killer_wins.  [deny(10)].
+
+generated: -alive(P4).  [resolve(11,a,12,b)].
+kept:      34 -alive(P4).  [resolve(11,a,12,b)].
+           35 -killer(P4) | civilians_win.  [resolve(11,a,16,b)].
+
+generated: -killer(P4).  [copy(35),unit_del(b,32)].
+kept:      36 -killer(P4).  [copy(35),unit_del(b,32)].
+
+generated: -alive(P5).  [resolve(17,a,12,b)].
+kept:      37 -alive(P5).  [resolve(17,a,12,b)].
+           38 -killer(P5) | civilians_win.  [resolve(17,a,16,b)].
+
+generated: -killer(P5).  [copy(38),unit_del(b,32)].
+kept:      39 -killer(P5).  [copy(38),unit_del(b,32)].
+
+generated: -alive(P8).  [resolve(18,a,12,b)].
+kept:      40 -alive(P8).  [resolve(18,a,12,b)].
+           41 -killer(P8) | civilians_win.  [resolve(18,a,16,b)].
+
+generated: -killer(P8).  [copy(41),unit_del(b,32)].
+kept:      42 -killer(P8).  [copy(41),unit_del(b,32)].
+
+generated: -alive(P7).  [resolve(19,a,12,b)].
+kept:      43 -alive(P7).  [resolve(19,a,12,b)].
+           44 -killer(P7) | civilians_win.  [resolve(19,a,16,b)].
+
+generated: -killer(P7).  [copy(44),unit_del(b,32)].
+kept:      45 -killer(P7).  [copy(44),unit_del(b,32)].
+
+generated: -alive(P3).  [resolve(20,a,12,b)].
+kept:      46 -alive(P3).  [resolve(20,a,12,b)].
+           47 -killer(P3) | civilians_win.  [resolve(20,a,16,b)].
+
+generated: -killer(P3).  [copy(47),unit_del(b,32)].
+kept:      48 -killer(P3).  [copy(47),unit_del(b,32)].
+
+generated: -alive(P1).  [resolve(21,a,12,b)].
+kept:      49 -alive(P1).  [resolve(21,a,12,b)].
+           50 -killer(P1) | civilians_win.  [resolve(21,a,16,b)].
+
+generated: -killer(P1).  [copy(50),unit_del(b,32)].
+kept:      51 -killer(P1).  [copy(50),unit_del(b,32)].
+
+generated: -alive(P2).  [resolve(22,a,12,b)].
+kept:      52 -alive(P2).  [resolve(22,a,12,b)].
+           53 -killer(P2) | civilians_win.  [resolve(22,a,16,b)].
+
+generated: -killer(P2).  [copy(53),unit_del(b,32)].
+kept:      54 -killer(P2).  [copy(53),unit_del(b,32)].
+
+generated: -killer(y) | y = y.  [factor(23,a,b)].
+tautology
+
+generated: -alive(y) | -killer(y) | y = y | alive(f1(y,y)) | killer_wins.  [factor(24,a,b)].
+tautology
+
+generated: -alive(y) | -killer(y) | y = y | f1(y,y) != y | killer_wins.  [factor(25,a,b)].
+tautology
+
+generated: -alive(y) | -killer(y) | y = y | f1(y,y) != y | killer_wins.  [factor(26,a,b)].
+tautology
+
+generated: civilians_win | killer_wins.  [back_unit_del(29)].
+
+============================== PROOF =================================
+
+% Proof 1 at 0.00 (+ 0.00) seconds.
+% Length of proof is 6.
+% Level of proof is 2.
+% Maximum clause weight is 2.000.
+% Given clauses 0.
+
+9 -civilians_win -> killer_wins # label(non_clause).  [assumption].
+10 killer_wins # label(non_clause) # label(goal).  [goal].
+29 civilians_win | killer_wins.  [clausify(9)].
+32 -civilians_win.  [assumption].
+33 -killer_wins.  [deny(10)].
+55 $F.  [back_unit_del(29),unit_del(a,32),unit_del(b,33)].
+
+============================== end of proof ==========================
+
+============================== STATISTICS ============================
+
+Given=0. Generated=30. Kept=25. proofs=1.
+Usable=0. Sos=8. Demods=0. Limbo=16, Disabled=46. Hints=0.
+Kept_by_rule=0, Deleted_by_rule=0.
+Forward_subsumed=4. Back_subsumed=0.
+Sos_limit_deleted=0. Sos_displaced=0. Sos_removed=0.
+New_demodulators=0 (0 lex), Back_demodulated=0. Back_unit_deleted=1.
+Demod_attempts=0. Demod_rewrites=0.
+Res_instance_prunes=0. Para_instance_prunes=0. Basic_paramod_prunes=0.
+Nonunit_fsub_feature_tests=1. Nonunit_bsub_feature_tests=9.
+Megabytes=0.09.
+User_CPU=0.00, System_CPU=0.00, Wall_clock=0.
+
+============================== end of statistics =====================
+
+============================== end of search =========================
+
+THEOREM PROVED
+
+Exiting with 1 proof.
+
+Process 77845 exit (max_proofs) Sun Dec  8 23:42:56 2024

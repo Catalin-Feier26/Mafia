@@ -46,17 +46,15 @@ def display_elimination_summary(screen, roles, statuses, votes, images):
     small_font = pygame.font.Font(None, 36)
 
     while True:
-        screen.fill((50, 50, 100))  # Clear the screen with the background color
+        screen.fill((50, 50, 100))  
         screen_width, screen_height = screen.get_size()
 
         summary_text = font.render("Elimination Summary", True, (255, 255, 255))
         screen.blit(summary_text, ((screen_width - summary_text.get_width()) // 2, int(screen_height * 0.05)))
 
-        # Adjust the Y offset for the characters and the elimination message
         adjusted_y_offset = int(screen_height * 0.2)
 
         if len(votes) > 0:
-            # Tally votes
             vote_count = {}
             for vote in votes.values():
                 if vote is not None:
@@ -73,14 +71,11 @@ def display_elimination_summary(screen, roles, statuses, votes, images):
             else:
                 elimination_message = "No one was eliminated."
 
-            # Display the elimination message
             elimination_text = small_font.render(elimination_message, True, (255, 255, 255))
             screen.blit(elimination_text, ((screen_width - elimination_text.get_width()) // 2, adjusted_y_offset))
 
-        # Draw characters with updated statuses
         draw_characters(screen, roles, statuses, images, adjusted_y_offset + 80)
 
-        # Continue button
         button_width, button_height = 200, 80
         button_x = (screen_width - button_width) // 2
         button_y = int(screen_height * 0.85)
