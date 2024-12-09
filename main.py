@@ -21,22 +21,22 @@ is_first_write = True
 night_number=1
 
 def complete_summary(status, game_stat):
+    
     with open(filename, "a") as file:
         for i, status in enumerate(status):
             if status == "alive":
-                file.write(f"alive(P{i + 1}).\n")
-    
-    if game_stat=="civil_win":
-        file.write('\nend_of_list.\n')
-        file.write('\nformulas(goals).\n')
-        file.write('civilians_win.\n')
-        file.write('\nend_of_list.')
-    else:
-        file.write('-civilians_win.\n')
-        file.write('end_of_list.\n')
-        file.write('\nformulas(goals).\n')
-        file.write('killer_wins.\n')
-        file.write('\nend_of_list.')
+                file.write(f"alive(P{i + 1}).\n")    
+        if game_stat=="civil_win":
+            file.write('\nend_of_list.\n')
+            file.write('\nformulas(goals).\n')
+            file.write('civilians_win.\n')
+            file.write('\nend_of_list.')
+        else:
+            file.write('-civilians_win.\n')
+            file.write('end_of_list.\n')
+            file.write('\nformulas(goals).\n')
+            file.write('killer_wins.\n')
+            file.write('\nend_of_list.')
 
 def concatenate_files():
     try:
@@ -115,7 +115,6 @@ def start_pygame_interface():
         button_x = (screen_width - button_width) // 2
         button_y = screen_height // 2
         
-        # Call the draw_button function
         is_hovering = draw_button(screen, "Start", button_font, button_color, button_hover_color, text_color, button_x, button_y, button_width, button_height)
 
         for event in pygame.event.get():
@@ -171,6 +170,8 @@ def start_game_window(screen, roles, statuses, images):
         if "Killer" not in [roles[i] for i, status in enumerate(statuses) if status == "alive"]:
             msg=f"killer(P{roles.index('Killer')+1}).\n"
             write_to_file(msg)
+            complete_summary(statuses,"civil_win")
+            concatenate_files()
             display_game_over_screen(screen, "Civilians Win")
             return
         if len([status for status in statuses if status == "alive"]) <= 2:
@@ -178,6 +179,8 @@ def start_game_window(screen, roles, statuses, images):
             write_to_file(msg)
             msg="-civilians_win.\n"
             write_to_file(msg)
+            complete_summary(statuses,"Killer_win")
+            concatenate_files()
             display_game_over_screen(screen, "Killer Wins")
             return
 
@@ -214,7 +217,7 @@ def start_game_window(screen, roles, statuses, images):
         if killer_choice == saved_player:
             messages.append(f"Killer's attack had no effect because Player {killer_choice + 1} was saved.")
         else:
-            statuses[killer_choice] = "dead"  # Update the status immediately
+            statuses[killer_choice] = "dead" 
             messages.append(f"Killer(Player{roles.index('Killer') + 1}) successfully killed Player {killer_choice + 1}.")
             summary_msg.append(f"dead(P{killer_choice+1}).\n")
 
@@ -231,12 +234,9 @@ def display_night_summary(screen, roles, statuses, images, messages, summary_msg
     while True:
         screen.fill((50, 50, 100))
         screen_width, screen_height = screen.get_size()
-
         summary_text = font.render("Night Summary", True, (255, 255, 255))
         screen.blit(summary_text, ((screen_width - summary_text.get_width()) // 2, int(screen_height * 0.05)))
-
         adjusted_y_offset = int(screen_height * 0.2)
-
         draw_characters(screen, roles, statuses, images, adjusted_y_offset)
 
         message_start_y = adjusted_y_offset + 200  
@@ -300,26 +300,19 @@ def draw_prompt_with_checkboxes(screen, prompt, labels, selected, font, position
 
 def police_officer_prompt(screen, statuses, roles, images, font):
     screen_width, screen_height = screen.get_size()
-
     button_width, button_height = 200, 50
     yes_x, yes_y = (screen_width // 4) - (button_width // 2), int(screen_height * 0.7)
     no_x, no_y = (3 * screen_width // 4) - (button_width // 2), int(screen_height * 0.7)
 
     while True:
         screen.fill((50, 50, 100))
-        
         draw_characters(screen, roles, statuses, images)
-
         prompt_text = font.render("Police: Do you want to shoot someone?", True, (255, 255, 255))
         prompt_x = (screen_width - prompt_text.get_width()) // 2
         prompt_y = int(screen_height * 0.3)  
         screen.blit(prompt_text, (prompt_x, prompt_y))
-
         is_hovering_yes = draw_button(screen, "Yes", font, (100, 200, 100), (80, 180, 80), (255, 255, 255), yes_x, yes_y, button_width, button_height)
-
         is_hovering_no = draw_button(screen, "No", font, (200, 100, 100), (180, 80, 80), (255, 255, 255), no_x, no_y, button_width, button_height)
-
-        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -336,12 +329,9 @@ def police_officer_prompt(screen, statuses, roles, images, font):
 def voting_stage(screen, roles, statuses, images):
     font = pygame.font.Font(None, 50)
     small_font = pygame.font.Font(None, 36)
-
     alive_players = [i for i, status in enumerate(statuses) if status == "alive"]
-
     votes = {player: None for player in alive_players}
     dropdown_open = {player: False for player in alive_players}
-
     running = True
 
     while running:
@@ -355,12 +345,10 @@ def voting_stage(screen, roles, statuses, images):
         margin = (screen_width - len(alive_players) * rect_width) // (len(alive_players) + 1)
         y = int(screen_height * 0.2)
 
-        # Get mouse position
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         for i, player_index in enumerate(alive_players):
             x = margin + i * (rect_width + margin)
-            # Draw player rectangle
             pygame.draw.rect(screen, (255, 255, 255), (x, y, rect_width, rect_height))
             screen.blit(images[roles[player_index]], (x + 10, y + 10))
 
@@ -371,7 +359,6 @@ def voting_stage(screen, roles, statuses, images):
             dropdown_y = y + rect_height + 20
             dropdown_width = 120
             dropdown_height = 30
-
             if dropdown_open[player_index]:
                 pygame.draw.rect(screen, (200, 200, 200), (dropdown_x, dropdown_y, dropdown_width, dropdown_height * len(alive_players)))
                 for j, target_player in enumerate(alive_players):
@@ -391,8 +378,6 @@ def voting_stage(screen, roles, statuses, images):
                 )
                 pygame.draw.rect(screen, (255, 255, 255), (dropdown_x, dropdown_y, dropdown_width, dropdown_height))
                 screen.blit(selected_text, (dropdown_x + 5, dropdown_y + 5))
-
-        # Replace button code with draw_button
         button_width, button_height = 200, 80
         button_x = (screen_width - button_width) // 2
         button_y = int(screen_height * 0.85)
@@ -409,24 +394,20 @@ def voting_stage(screen, roles, statuses, images):
             button_width,
             button_height,
         )
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if button_hovering:  # Check if button is hovered and clicked
-                    running = False  # Exit the loop
+                if button_hovering:  
+                    running = False  
                 
-                # Handle dropdown toggling
                 for player_index in alive_players:
                     dropdown_x = margin + alive_players.index(player_index) * (rect_width + margin)
                     dropdown_y = y + rect_height + 20
                     if dropdown_x <= mouse_x <= dropdown_x + dropdown_width and dropdown_y <= mouse_y <= dropdown_y + dropdown_height:
                         dropdown_open[player_index] = not dropdown_open[player_index]  
-
         pygame.display.flip()
-
     print("Votes:", votes)
     process_votes(screen, roles, statuses, votes, images)
     return
@@ -436,7 +417,6 @@ def process_votes(screen, roles, statuses, votes, images):
     for vote in votes.values():
         if vote is not None:
             vote_count[vote] = vote_count.get(vote, 0) + 1
-
     most_votes = max(vote_count.values(), default=0)
     potential_killers = [player for player, count in vote_count.items() if count == most_votes]
 
@@ -455,19 +435,14 @@ def process_votes(screen, roles, statuses, votes, images):
             return True 
     else:
         print("No majority vote. No one is eliminated.")
-
-
-    # Show the elimination summary screen
     display_elimination_summary(screen, roles, statuses, votes, images)
-
-    # After showing the summary, check if the game is over
     if any(roles[i] == "Killer" and statuses[i] == "alive" for i in range(len(roles))):
-        return False  # Continue the game (killer still alive)
+        return False  
     else:
         complete_summary(statuses,"civil_win")
         concatenate_files()
         display_game_over_screen(screen, "Civilians Win")
-        return True  # Game over (no killers alive)
+        return True 
 
 if __name__ == "__main__":
     start_pygame_interface()

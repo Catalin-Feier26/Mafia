@@ -36,8 +36,6 @@ all x all y (killer(x) & killer(y) -> x = y).
 % If someone is alive, they cannot be dead.
 all x (alive(x) -> -dead(x)).
 all x (dead(x) -> -alive(x)).
--civilians_win -> killer_wins.
-
 
 alive(x) -> -dead(x).
 dead(x) -> -alive(x).
@@ -54,19 +52,22 @@ exists x exists y (
 exists x (
   alive(x) & killer(x) & all y (alive(y) -> y = x)
 ) -> killer_wins.
+-civilians_win -> killer_wins.
 
-% What is known
-dead(P4).
-dead(P5).
-dead(P8).
-dead(P7).
+%What is known
+
 dead(P3).
-dead(P1).
-killer(P6).
+dead(P7).
+dead(P6).
 dead(P2).
-alive(P6).
+dead(P5).
+dead(P7).
+dead(P7).
+dead(P1).
+killer(P4).
 -civilians_win.
-
+alive(P4).
+-civilians_win.
 end_of_list.
 
 formulas(goals).
