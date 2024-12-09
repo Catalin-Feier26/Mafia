@@ -68,10 +68,6 @@ def write_to_file(content):
     if is_first_write:
         is_first_write = False  
 
-
-
-    pass
-
 def write_to_file(content):
     global is_first_write
     mode = "w" if is_first_write else "a" 
