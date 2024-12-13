@@ -117,6 +117,7 @@ def display_game_over_screen(screen, message):
             (100, 200, 100),   
             (120, 220, 120),   
             (255, 255, 255),   
+            button_x,
             button_y,
             button_width,
             button_height
